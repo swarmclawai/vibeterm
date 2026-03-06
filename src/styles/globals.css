@@ -1,0 +1,204 @@
+@import "tailwindcss";
+@import "@xterm/xterm/css/xterm.css";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--vt-bg, #0d1117);
+  color: var(--vt-foreground, #c9d1d9);
+  font-family:
+    "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
+}
+
+button:not(:disabled),
+select:not(:disabled),
+summary,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* focused pane glow */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
+}
+
+.pane-glow {
+  position: relative;
+  border-radius: var(--vt-border-radius, 6px);
+  overflow: visible;
+  z-index: 1;
+}
+
+/* soft neon glow halo */
+.pane-glow::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--vt-glow-width, 8px) * -0.32);
+  border-radius: var(--vt-border-radius, 6px);
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 26%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 2.5) calc(var(--vt-glow-width, 8px) * 0.18) color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 20%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 4.75) calc(var(--vt-glow-width, 8px) * 0.95) color-mix(in srgb, var(--vt-glow-halo, var(--vt-accent, #388bfd)) 12%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 8) calc(var(--vt-glow-width, 8px) * 2) color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 7%, transparent);
+  opacity: calc(0.62 + (var(--glow-intensity, 1) * 0.14));
+}
+
+/* rotating color border */
+.pane-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--vt-border-radius, 6px);
+  padding: max(1px, calc(var(--vt-glow-width, 8px) * 0.14));
+  background: conic-gradient(
+    from var(--glow-angle),
+    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 92%, white 8%),
+    color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 86%, transparent),
+    color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 78%, transparent),
+    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 92%, white 8%)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+  opacity: calc(0.34 + (var(--glow-intensity, 1) * 0.18));
+  filter: saturate(1.08);
+  animation: glow-spin 8.5s linear infinite;
+}
+
+/* react-resizable-panels resize handles */
+[data-panel-resize-handle-id] {
+  background: var(--vt-separator, #21262d);
+  transition: background 0.15s;
+}
+[data-panel-resize-handle-id]:hover,
+[data-panel-resize-handle-id][data-resize-handle-active] {
+  background: var(--vt-separator-active, #388bfd);
+}
+
+.companion-resize-handle {
+  position: relative;
+  width: 8px;
+  min-width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+}
+
+.companion-resize-handle::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: min(96px, 28%);
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vt-input-border, #30363d) 82%, transparent);
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.companion-resize-handle:hover::after {
+  background: color-mix(in srgb, var(--vt-accent, #388bfd) 86%, white 14%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--vt-accent, #388bfd) 24%, transparent);
+}
+
+.vt-tooltip-trigger {
+  position: relative;
+  z-index: 20;
+}
+
+.vt-tooltip-trigger::before,
+.vt-tooltip-trigger::after {
+  position: absolute;
+  left: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.vt-tooltip-trigger::before {
+  content: "";
+  top: calc(100% + 2px);
+  transform: translate(-50%, -4px);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid color-mix(in srgb, var(--vt-dropdown-bg, #1c2128) 94%, black 6%);
+}
+
+.vt-tooltip-trigger::after {
+  content: attr(data-tip);
+  top: calc(100% + 7px);
+  transform: translate(-50%, -4px);
+  padding: 4px 7px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--vt-border, #21262d) 88%, white 12%);
+  background: color-mix(in srgb, var(--vt-dropdown-bg, #1c2128) 94%, black 6%);
+  color: var(--vt-foreground, #c9d1d9);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.8);
+  z-index: 200;
+}
+
+.vt-tooltip-trigger[data-tip-side="top"]::before {
+  top: auto;
+  bottom: calc(100% + 2px);
+  transform: translate(-50%, 4px);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid color-mix(in srgb, var(--vt-dropdown-bg, #1c2128) 94%, black 6%);
+  border-bottom: none;
+}
+
+.vt-tooltip-trigger[data-tip-side="top"]::after {
+  top: auto;
+  bottom: calc(100% + 7px);
+  transform: translate(-50%, 4px);
+}
+
+.vt-tooltip-trigger[data-tip=""]::before,
+.vt-tooltip-trigger[data-tip=""]::after {
+  display: none;
+}
+
+.vt-tooltip-trigger:hover::before,
+.vt-tooltip-trigger:hover::after,
+.vt-tooltip-trigger:focus-visible::before,
+.vt-tooltip-trigger:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.vt-tooltip-trigger:hover,
+.vt-tooltip-trigger:focus-visible {
+  z-index: 140;
+}
