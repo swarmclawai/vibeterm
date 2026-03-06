@@ -1,6 +1,6 @@
 {
   "name": "@swarmclawai/vibeterm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Desktop-first terminal workspace with Tauri, launcher-aware sessions, and a companion browser.",
   "homepage": "https://github.com/swarmclawai/vibeterm#readme",
@@ -49,24 +49,24 @@
     "remote:server:release": "cargo run --release --manifest-path src-tauri/Cargo.toml --bin remote_server"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@tauri-apps/cli": "^2",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
+    "@vitejs/plugin-react": "^4.6.0",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/addon-web-links": "^0.12.0",
     "@xterm/xterm": "^6.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-resizable-panels": "^4.7.0",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.0.4",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
-    "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "tailwindcss": "^4.2.1",
-    "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "typescript": "~5.8.3"
   }
 }

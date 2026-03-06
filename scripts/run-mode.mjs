@@ -42,16 +42,45 @@ if (mode === "desktop") {
 }
 
 const [command, commandArgs] = childArgs;
-const child = spawn(command, commandArgs, {
-  stdio: "inherit",
-  env: process.env,
-  cwd: packageDir,
-});
 
-child.on("exit", (code, signal) => {
-  if (signal) {
-    process.kill(process.pid, signal);
-    return;
-  }
-  process.exit(code ?? 0);
-});
+if (mode === "desktop") {
+  const cargoCheck = spawn("cargo", ["--version"], {
+    stdio: "ignore",
+    env: process.env,
+    cwd: packageDir,
+  });
+
+  cargoCheck.on("error", () => {
+    console.error("Desktop mode requires Rust/Cargo and Tauri desktop prerequisites on this machine.");
+    console.error("Install Rust from https://rustup.rs or run `vibeterm web` instead.");
+    process.exit(1);
+  });
+
+  cargoCheck.on("exit", (code) => {
+    if (code !== 0) {
+      console.error("Desktop mode requires a working Cargo toolchain on this machine.");
+      console.error("Install Rust from https://rustup.rs or run `vibeterm web` instead.");
+      process.exit(code ?? 1);
+    }
+
+    launch();
+  });
+} else {
+  launch();
+}
+
+function launch() {
+  const child = spawn(command, commandArgs, {
+    stdio: "inherit",
+    env: process.env,
+    cwd: packageDir,
+  });
+
+  child.on("exit", (code, signal) => {
+    if (signal) {
+      process.kill(process.pid, signal);
+      return;
+    }
+    process.exit(code ?? 0);
+  });
+}
