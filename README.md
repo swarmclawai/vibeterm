@@ -1,14 +1,14 @@
 # VibeTerm 2
 
-`@swarmclawai/vibeterm@0.2.1` is a desktop-first terminal workspace built with Tauri, React, and xterm.js.
+`@swarmclawai/vibeterm@0.2.2` is a desktop-first terminal workspace built with Tauri, React, and xterm.js.
 
 It supports:
 
 - desktop mode by default
 - optional web/remote mode
 - launcher-aware terminal creation
+- startup-directory aware session creation
 - pinned and recent project directories
-- companion browser panel
 - theme previews, extra bundled themes, and local custom themes
 
 ## Install
@@ -31,6 +31,14 @@ You can also start it explicitly:
 
 ```bash
 vibeterm desktop
+```
+
+Or launch with a specific startup directory already selected:
+
+```bash
+vibeterm ~/Dev/my-project
+vibeterm desktop ~/Dev/my-project
+vibeterm --cwd ~/Dev/my-project
 ```
 
 ## Web Mode
@@ -81,36 +89,27 @@ Desktop mode:
 
 - native Tauri shell
 - local launcher detection
-- companion browser available
+- optional launcher bypass that starts the default shell immediately
 
 Web mode:
 
 - browser client with remote PTY backend
 - starts a default shell automatically
-- companion browser is disabled by design
 
 ## Launcher
 
 The launcher supports:
 
+- quick start with the default shell
 - pinned directories
 - recent directories
 - typed path selection
+- machine-wide directory search on macOS
 - provider-aware session launch and resume
 - shell selection when multiple local shells are detected
+- a settings toggle to disable the launcher and auto-start the default shell
 
 In smaller panes, the launcher automatically switches to a compact quick-launch layout.
-
-## Companion Browser
-
-The companion is browser-first:
-
-- native child webview in the desktop app
-- search-or-URL address field
-- dock left, dock right, or float
-- collapsible header
-
-It never relies on iframes.
 
 ## Themes
 

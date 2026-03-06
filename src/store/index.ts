@@ -12,6 +12,7 @@ export interface PaneSlot {
 }
 
 export interface AppSettings {
+  showLauncher: boolean;
   gap: number;
   borderRadius: number;
   glowEnabled: boolean;
@@ -43,6 +44,7 @@ export interface CompanionState {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
+  showLauncher: true,
   gap: 8,
   borderRadius: 6,
   glowEnabled: true,

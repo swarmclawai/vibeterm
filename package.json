@@ -1,8 +1,8 @@
 {
   "name": "@swarmclawai/vibeterm",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
-  "description": "Desktop-first terminal workspace with Tauri, launcher-aware sessions, and a companion browser.",
+  "description": "Desktop-first terminal workspace with Tauri and launcher-aware sessions.",
   "homepage": "https://github.com/swarmclawai/vibeterm#readme",
   "bugs": {
     "url": "https://github.com/swarmclawai/vibeterm/issues"

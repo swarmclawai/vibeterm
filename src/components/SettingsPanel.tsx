@@ -151,6 +151,19 @@ export function SettingsPanel() {
   return (
     <div className="w-[260px] p-3 flex flex-col gap-3">
       <div className="text-[10px] uppercase tracking-wider text-[var(--vt-dim-text)] font-medium">
+        Startup
+      </div>
+      <div className="flex flex-col gap-2">
+        <Toggle
+          label="Show launcher"
+          checked={settings.showLauncher}
+          onChange={(value) => update({ showLauncher: value })}
+        />
+      </div>
+
+      <div className="border-t border-[var(--vt-input-border)]" />
+
+      <div className="text-[10px] uppercase tracking-wider text-[var(--vt-dim-text)] font-medium">
         Layout
       </div>
       <div className="flex flex-col gap-2">

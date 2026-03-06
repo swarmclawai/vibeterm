@@ -33,7 +33,7 @@ export function AppSplash({ visible }: AppSplashProps) {
         </div>
 
         <div className="mt-5 text-[11px] text-[var(--vt-dim-text)]">
-          Preparing panes, themes, and companion tools.
+          Preparing panes, themes, and launchers.
         </div>
       </div>
     </div>

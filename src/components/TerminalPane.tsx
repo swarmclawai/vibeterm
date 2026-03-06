@@ -126,8 +126,10 @@ export function TerminalPane({ sessionId, paneIndex }: TerminalPaneProps) {
     () =>
       ({
         "--glow-intensity": glowIntensity,
+        "--vt-border-radius": `${borderRadius}px`,
+        borderRadius: `${borderRadius}px`,
       }) as React.CSSProperties,
-    [glowIntensity],
+    [borderRadius, glowIntensity],
   );
 
   if (!session) return null;
@@ -141,7 +143,7 @@ export function TerminalPane({ sessionId, paneIndex }: TerminalPaneProps) {
     <div
       className={`flex flex-col h-full w-full select-none ${isFocused && glowEnabled ? "pane-glow" : ""}`}
       style={{
-        ...(isFocused && glowEnabled ? glowStyle : {}),
+        ...glowStyle,
         opacity: isBeingDragged ? 0.5 : 1,
       }}
       onClick={handleFocus}

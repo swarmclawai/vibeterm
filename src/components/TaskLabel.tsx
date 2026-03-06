@@ -61,7 +61,7 @@ function HeaderIconButton({
     <button
       {...props}
       data-tip={tooltip}
-      data-tip-side="top"
+      data-tip-side="bottom"
       className={`vt-tooltip-trigger cursor-pointer rounded px-1 text-sm transition-colors ${
         active
           ? "bg-[color-mix(in_srgb,var(--vt-accent)_14%,transparent)] text-[var(--vt-foreground)]"
@@ -119,7 +119,7 @@ export function TaskLabel({
         <span
           onMouseDown={onDragHandleMouseDown}
           data-tip="Drag to reorder"
-          data-tip-side="top"
+          data-tip-side="bottom"
           className="vt-tooltip-trigger cursor-grab active:cursor-grabbing text-[var(--vt-dim-text)] hover:text-[var(--vt-muted-text)] shrink-0 leading-none text-sm"
           title="Drag to reorder"
         >
@@ -161,7 +161,7 @@ export function TaskLabel({
       {launcherLabel && (
         <span
           data-tip={launcherTooltip(launcherLabel, resumeMode, providerSessionId)}
-          data-tip-side="top"
+          data-tip-side="bottom"
           className="vt-tooltip-trigger shrink-0 rounded-full border border-[var(--vt-input-border)] bg-[color-mix(in_srgb,var(--vt-accent)_9%,transparent)] px-2 py-0.5 text-[10px] font-medium text-[var(--vt-foreground)]"
           title={launcherTooltip(launcherLabel, resumeMode, providerSessionId)}
         >

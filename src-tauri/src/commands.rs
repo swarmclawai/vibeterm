@@ -4,6 +4,7 @@ use crate::launchers::{
 };
 use crate::session::{SessionInfo, TaskStatus};
 use crate::session_registry::SessionRegistry;
+use std::path::PathBuf;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
@@ -95,6 +96,27 @@ pub fn search_directories(
     Ok(launchers::search_directories(
         &query,
         limit.unwrap_or(12),
+    ))
+}
+
+#[tauri::command]
+pub fn get_launch_directory() -> Result<Option<String>, String> {
+    let Ok(value) = std::env::var("VIBETERM_START_DIR") else {
+        return Ok(None);
+    };
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    let path = PathBuf::from(trimmed);
+    if !path.is_dir() {
+        return Ok(None);
+    }
+    Ok(Some(
+        path.canonicalize()
+            .unwrap_or(path)
+            .to_string_lossy()
+            .to_string(),
     ))
 }
 

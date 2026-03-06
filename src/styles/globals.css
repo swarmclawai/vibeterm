@@ -48,31 +48,33 @@ select:disabled {
 .pane-glow::after {
   content: "";
   position: absolute;
-  inset: calc(var(--vt-glow-width, 8px) * -0.32);
-  border-radius: var(--vt-border-radius, 6px);
+  inset: calc(var(--vt-glow-width, 8px) * -0.52);
+  border-radius: calc(var(--vt-border-radius, 6px) + (var(--vt-glow-width, 8px) * 0.44));
   pointer-events: none;
   z-index: 0;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 26%, transparent),
-    0 0 calc(var(--vt-glow-width, 8px) * 2.5) calc(var(--vt-glow-width, 8px) * 0.18) color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 20%, transparent),
-    0 0 calc(var(--vt-glow-width, 8px) * 4.75) calc(var(--vt-glow-width, 8px) * 0.95) color-mix(in srgb, var(--vt-glow-halo, var(--vt-accent, #388bfd)) 12%, transparent),
-    0 0 calc(var(--vt-glow-width, 8px) * 8) calc(var(--vt-glow-width, 8px) * 2) color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 7%, transparent);
-  opacity: calc(0.62 + (var(--glow-intensity, 1) * 0.14));
+    0 0 0 1px color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 38%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 2.4) calc(var(--vt-glow-width, 8px) * 0.15) color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 26%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 4.4) calc(var(--vt-glow-width, 8px) * 0.42) color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 24%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 6.2) calc(var(--vt-glow-width, 8px) * 0.82) color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 18%, transparent),
+    0 0 calc(var(--vt-glow-width, 8px) * 8.8) calc(var(--vt-glow-width, 8px) * 1.45) color-mix(in srgb, var(--vt-glow-halo, var(--vt-accent, #388bfd)) 14%, transparent);
+  opacity: calc(0.72 + (var(--glow-intensity, 1) * 0.16));
 }
 
 /* rotating color border */
 .pane-glow::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: var(--vt-border-radius, 6px);
-  padding: max(1px, calc(var(--vt-glow-width, 8px) * 0.14));
+  inset: calc(var(--vt-glow-width, 8px) * -0.28);
+  border-radius: calc(var(--vt-border-radius, 6px) + (var(--vt-glow-width, 8px) * 0.22));
+  padding: max(2px, calc(var(--vt-glow-width, 8px) * 0.24));
   background: conic-gradient(
     from var(--glow-angle),
-    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 92%, white 8%),
-    color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 86%, transparent),
-    color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 78%, transparent),
-    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 92%, white 8%)
+    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 94%, white 6%) 0deg 70deg,
+    color-mix(in srgb, var(--vt-glow-secondary, var(--vt-accent, #388bfd)) 92%, white 8%) 70deg 152deg,
+    color-mix(in srgb, var(--vt-glow-tertiary, var(--vt-accent, #388bfd)) 92%, white 8%) 152deg 244deg,
+    color-mix(in srgb, var(--vt-glow-halo, var(--vt-accent, #388bfd)) 88%, white 12%) 244deg 320deg,
+    color-mix(in srgb, var(--vt-glow-primary, var(--vt-accent, #388bfd)) 94%, white 6%) 320deg 360deg
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -84,9 +86,9 @@ select:disabled {
   mask-composite: exclude;
   pointer-events: none;
   z-index: 2;
-  opacity: calc(0.34 + (var(--glow-intensity, 1) * 0.18));
-  filter: saturate(1.08);
-  animation: glow-spin 8.5s linear infinite;
+  opacity: calc(0.56 + (var(--glow-intensity, 1) * 0.18));
+  filter: saturate(1.18);
+  animation: glow-spin 6.2s linear infinite;
 }
 
 /* react-resizable-panels resize handles */

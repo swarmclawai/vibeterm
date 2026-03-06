@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, type ButtonHTMLAttributes, type ReactNode } from "react";
-import { isTauriRuntime } from "../lib/tauri";
 import { useStore } from "../store";
 import { changeGridWithWarning } from "../lib/grid";
 import { MAX_GRID } from "../lib/layouts";
@@ -148,10 +147,6 @@ export function TopBar() {
   const customThemes = useStore((s) => s.customThemes);
   const setTheme = useStore((s) => s.setTheme);
   const setThemePreview = useStore((s) => s.setThemePreview);
-  const companionOpen = useStore((s) => s.companion.open);
-  const toggleCompanion = useStore((s) => s.toggleCompanion);
-  const closeCompanion = useStore((s) => s.closeCompanion);
-  const companionAvailable = isTauriRuntime();
 
   const [gridOpen, setGridOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
@@ -169,13 +164,6 @@ export function TopBar() {
       setThemePreview(null);
     }
   }, [themeOpen, themePreview, setThemePreview]);
-
-  useEffect(() => {
-    if (!companionAvailable && companionOpen) {
-      closeCompanion();
-    }
-  }, [closeCompanion, companionAvailable, companionOpen]);
-
   const availableThemes = [...THEMES, ...customThemes];
   const activeTheme = themePreview ?? theme;
   const isPreviewing = Boolean(themePreview && themePreview.name !== theme.name);
@@ -303,23 +291,6 @@ export function TopBar() {
           </div>
         )}
       </div>
-
-      <ToolbarButton
-        onClick={toggleCompanion}
-        active={companionOpen}
-        disabled={!companionAvailable}
-        tooltip={
-          companionAvailable
-            ? companionOpen
-              ? "Hide companion panel"
-              : "Show companion panel"
-            : "Companion panel is available in the desktop app only"
-        }
-      >
-        <span className="text-sm">◨</span>
-        <span>Companion</span>
-      </ToolbarButton>
-
       <div className="flex-1" />
     </div>
   );

@@ -23,6 +23,7 @@ pub fn run() {
             commands::list_local_shells,
             commands::list_provider_sessions,
             commands::search_directories,
+            commands::get_launch_directory,
             commands::list_companions,
             commands::open_companion,
             commands::get_session_cwd,

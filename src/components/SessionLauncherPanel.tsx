@@ -17,6 +17,7 @@ import {
   type ProviderSessionInfo,
   type SessionInfo,
 } from "../lib/tauri";
+import { useStore } from "../store";
 
 interface SessionLauncherPanelProps {
   defaultCwd?: string;
@@ -272,7 +273,8 @@ export function SessionLauncherPanel({
   const [loadingProviderSessions, setLoadingProviderSessions] = useState(false);
   const [spawning, setSpawning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const autoStartedRemoteRef = useRef(false);
+  const autoLaunchRef = useRef(false);
+  const showLauncher = useStore((state) => state.settings.showLauncher);
 
   const [favoriteDirectories, setFavoriteDirectories] = useState<DirectoryMatch[]>(
     () => readSavedDirectories(FAVORITES_STORAGE_KEY),
@@ -289,6 +291,7 @@ export function SessionLauncherPanel({
 
   const runtime = getTerminalRuntime();
   const isRemoteRuntime = runtime === "remote";
+  const shouldAutoLaunchShell = isRemoteRuntime || !showLauncher;
   const trimmedDirectoryQuery = directoryQuery.trim();
 
   useEffect(() => {
@@ -356,6 +359,12 @@ export function SessionLauncherPanel({
       return defaultShell.id;
     });
   }, [shells]);
+
+  useEffect(() => {
+    const nextDefault = defaultCwd?.trim();
+    if (!nextDefault || workingDirectory.trim()) return;
+    setWorkingDirectory(nextDefault);
+  }, [defaultCwd, workingDirectory]);
 
   const selectedLauncher = useMemo(
     () => launchers.find((l) => l.id === launcherId) ?? launchers[0] ?? FALLBACK_LAUNCHER,
@@ -504,6 +513,7 @@ export function SessionLauncherPanel({
     && !spawning
     && hasTerminalRuntime()
     && (resumeMode !== "session" || providerSessionId.trim().length > 0);
+  const canQuickStart = !loading && !spawning && hasTerminalRuntime();
 
   const isMicroPane = panelWidth > 0 && panelWidth < 320;
 
@@ -544,13 +554,9 @@ export function SessionLauncherPanel({
     return badges;
   }, [favoritePaths, recentPaths]);
 
-  const launch = useCallback(async () => {
-    if (!canLaunch) return;
+  const startSession = useCallback(async (launchConfig: LaunchRequest) => {
     setSpawning(true);
     setError(null);
-    const launchConfig: LaunchRequest = { launcherId: selectedLauncher.id, resumeMode };
-    if (selectedLauncher.id === "shell" && selectedShell) launchConfig.shellId = selectedShell.id;
-    if (resumeMode === "session") launchConfig.providerSessionId = providerSessionId.trim();
     const nextDirectory = workingDirectory.trim() || defaultCwd?.trim() || "";
     try {
       const info = nextDirectory
@@ -565,25 +571,44 @@ export function SessionLauncherPanel({
     } finally {
       setSpawning(false);
     }
-  }, [canLaunch, defaultCwd, onCreated, providerSessionId, rememberRecentDirectory, resumeMode, selectedDirectory, selectedLauncher.id, selectedShell, workingDirectory]);
+  }, [defaultCwd, onCreated, rememberRecentDirectory, selectedDirectory, workingDirectory]);
+
+  const launch = useCallback(async () => {
+    if (!canLaunch) return;
+    const launchConfig: LaunchRequest = { launcherId: selectedLauncher.id, resumeMode };
+    if (selectedLauncher.id === "shell" && selectedShell) launchConfig.shellId = selectedShell.id;
+    if (resumeMode === "session") launchConfig.providerSessionId = providerSessionId.trim();
+    await startSession(launchConfig);
+  }, [canLaunch, providerSessionId, resumeMode, selectedLauncher.id, selectedShell, startSession]);
+
+  const launchDefaultShell = useCallback(async () => {
+    if (!canQuickStart) return;
+    const launchConfig: LaunchRequest = {
+      launcherId: "shell",
+      resumeMode: "new",
+    };
+    if (selectedShell) {
+      launchConfig.shellId = selectedShell.id;
+    }
+    await startSession(launchConfig);
+  }, [canQuickStart, selectedShell, startSession]);
 
   useEffect(() => {
-    if (!isRemoteRuntime || loading || spawning || autoStartedRemoteRef.current) return;
-    autoStartedRemoteRef.current = true;
-    void launch();
-  }, [isRemoteRuntime, launch, loading, spawning]);
+    if (!shouldAutoLaunchShell || loading || spawning || autoLaunchRef.current) return;
+    autoLaunchRef.current = true;
+    void launchDefaultShell();
+  }, [launchDefaultShell, loading, shouldAutoLaunchShell, spawning]);
 
-  // Remote runtime — auto-start shell
-  if (isRemoteRuntime) {
+  if (shouldAutoLaunchShell) {
     return (
       <div className="flex h-full w-full min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--vt-border-radius)] border border-[var(--vt-border)] bg-[var(--vt-bg)]">
         <div className="flex flex-1 min-h-0 items-center justify-center p-5">
           <div className="w-full max-w-[360px] text-center">
             <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--vt-dim-text)]">
-              Remote Runtime
+              {isRemoteRuntime ? "Remote Runtime" : "Quick Start"}
             </div>
             <div className="mt-2 text-[16px] font-semibold text-[var(--vt-foreground)]">
-              {spawning ? "Connecting..." : error ? "Connection failed" : "Starting shell..."}
+              {spawning ? (isRemoteRuntime ? "Connecting..." : "Starting default shell...") : error ? "Connection failed" : "Starting shell..."}
             </div>
             {error && (
               <div className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--vt-accent)_30%,var(--vt-input-border))] bg-[color-mix(in_srgb,var(--vt-accent)_8%,transparent)] px-3 py-2 text-[11px] text-[var(--vt-foreground)]">
@@ -593,8 +618,8 @@ export function SessionLauncherPanel({
             {error && (
               <button
                 type="button"
-                onClick={() => void launch()}
-                disabled={!canLaunch}
+                onClick={() => void launchDefaultShell()}
+                disabled={!canQuickStart}
                 className="mt-3 rounded-xl bg-[var(--vt-accent)] px-5 py-2 text-[12px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-45"
               >
                 Retry
@@ -628,11 +653,11 @@ export function SessionLauncherPanel({
           </div>
           <button
             type="button"
-            onClick={() => void launch()}
-            disabled={!canLaunch}
+            onClick={() => void launchDefaultShell()}
+            disabled={!canQuickStart}
             className="w-full cursor-pointer rounded-xl bg-[var(--vt-accent)] px-4 py-2.5 text-[12px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
           >
-            {spawning ? "Starting..." : "Launch"}
+            {spawning ? "Starting..." : "Quick Start"}
           </button>
           {error && (
             <div className="rounded-xl border border-[color-mix(in_srgb,var(--vt-accent)_35%,var(--vt-input-border))] bg-[color-mix(in_srgb,var(--vt-accent)_10%,transparent)] px-3 py-2 text-[11px] text-[var(--vt-foreground)]">
@@ -663,6 +688,14 @@ export function SessionLauncherPanel({
         <StepIndicator step={step} total={4} />
         <div className="flex-1" />
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => void launchDefaultShell()}
+            disabled={!canQuickStart}
+            className="cursor-pointer rounded-md border border-[color-mix(in_srgb,var(--vt-accent)_34%,var(--vt-input-border))] bg-[color-mix(in_srgb,var(--vt-accent)_10%,transparent)] px-2.5 py-1 text-[11px] font-medium text-[var(--vt-foreground)] transition-colors hover:border-[color-mix(in_srgb,var(--vt-accent)_52%,var(--vt-input-border))] disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {spawning ? "Starting..." : `Quick Start${selectedShell ? ` · ${selectedShell.label}` : ""}`}
+          </button>
           {step > 0 && (
             <button
               type="button"
@@ -695,7 +728,7 @@ export function SessionLauncherPanel({
                 Step 1 &middot; Choose directory
               </div>
               <div className="mt-1 text-[11px] text-[var(--vt-muted-text)]">
-                Pick a project folder or skip to use the default.
+                Search your machine for a project folder or skip to use the default.
               </div>
             </div>
 
@@ -719,7 +752,7 @@ export function SessionLauncherPanel({
                   }
                 }}
                 className="w-full rounded-lg border border-[var(--vt-input-border)] bg-[var(--vt-bg)] py-1.5 pl-7 pr-3 text-[12px] text-[var(--vt-foreground)] outline-none transition-colors focus:border-[var(--vt-accent)]"
-                placeholder="Search project or paste path..."
+                placeholder="Search your Mac or paste path..."
               />
             </div>
 

@@ -444,6 +444,13 @@ export async function searchDirectories(
   return invoke("search_directories", { query, limit });
 }
 
+export async function getLaunchDirectory(): Promise<string | null> {
+  if (RUNTIME_MODE !== "tauri") {
+    return null;
+  }
+  return invoke<string | null>("get_launch_directory");
+}
+
 export async function listCompanions(): Promise<CompanionInfo[]> {
   if (RUNTIME_MODE !== "tauri") {
     return [];

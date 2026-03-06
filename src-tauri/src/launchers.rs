@@ -155,16 +155,34 @@ pub fn search_directories(query: &str, limit: usize) -> Vec<DirectorySearchResul
     let trimmed = query.trim();
     let normalized_query = normalize_directory_query(trimmed);
     let search_limit = limit.clamp(1, 24);
-    let roots = search_roots_for_query(trimmed);
-    if roots.is_empty() {
-        return Vec::new();
-    }
-
     let mut seen = HashSet::new();
     let mut matches = Vec::new();
+
+    for candidate_path in global_directory_candidates(trimmed, search_limit.saturating_mul(6)) {
+        if let Some(candidate) = build_directory_match(&candidate_path, &normalized_query) {
+            let key = candidate.path.clone();
+            if seen.insert(key) {
+                matches.push(candidate);
+            }
+        }
+    }
+
+    let roots = search_roots_for_query(trimmed);
+    if roots.is_empty() {
+        return matches
+            .into_iter()
+            .take(search_limit)
+            .map(|candidate| DirectorySearchResult {
+                path: candidate.path,
+                label: candidate.label,
+                icon_path: candidate.icon_path,
+            })
+            .collect();
+    }
+
     let mut scanned_dirs = 0usize;
-    let scan_budget = 1_200usize;
-    let max_depth = 4usize;
+    let scan_budget = 1_800usize;
+    let max_depth = 5usize;
 
     for root in &roots {
         if scanned_dirs >= scan_budget {
@@ -649,6 +667,65 @@ fn search_roots_for_query(query: &str) -> Vec<PathBuf> {
     roots
 }
 
+fn global_directory_candidates(query: &str, limit: usize) -> Vec<PathBuf> {
+    let mut results = Vec::new();
+    let mut seen = HashSet::new();
+
+    for path in spotlight_directory_candidates(query, limit) {
+        if seen.insert(path.clone()) {
+            results.push(path);
+        }
+    }
+
+    results
+}
+
+#[cfg(target_os = "macos")]
+fn spotlight_directory_candidates(query: &str, limit: usize) -> Vec<PathBuf> {
+    let trimmed = query.trim();
+    if trimmed.is_empty() || limit == 0 {
+        return Vec::new();
+    }
+
+    let escaped = trimmed.replace('\\', "\\\\").replace('"', "\\\"");
+    let expression = format!(
+        r#"kMDItemFSName == "*{escaped}*"cd || kMDItemPath == "*{escaped}*"cd"#
+    );
+
+    let output = std::process::Command::new("mdfind")
+        .arg("-0")
+        .arg(expression)
+        .output();
+
+    let Ok(output) = output else {
+        return Vec::new();
+    };
+    if !output.status.success() {
+        return Vec::new();
+    }
+
+    output
+        .stdout
+        .split(|byte| *byte == 0)
+        .filter_map(|chunk| {
+            if chunk.is_empty() {
+                return None;
+            }
+            let path = PathBuf::from(String::from_utf8_lossy(chunk).to_string());
+            if !path.is_dir() || is_hidden_directory(&path) {
+                return None;
+            }
+            Some(path)
+        })
+        .take(limit)
+        .collect()
+}
+
+#[cfg(not(target_os = "macos"))]
+fn spotlight_directory_candidates(_query: &str, _limit: usize) -> Vec<PathBuf> {
+    Vec::new()
+}
+
 fn query_seed_paths(path: &Path) -> Vec<PathBuf> {
     let mut seeds = Vec::new();
     if path.is_dir() {
@@ -675,6 +752,7 @@ fn query_seed_paths(path: &Path) -> Vec<PathBuf> {
 fn common_project_roots() -> Vec<PathBuf> {
     let home = home_dir();
     let mut roots = vec![
+        home.clone(),
         home.join("Dev"),
         home.join("Developer"),
         home.join("Code"),
@@ -682,6 +760,10 @@ fn common_project_roots() -> Vec<PathBuf> {
         home.join("Documents"),
         home.join("Work"),
     ];
+    let volumes = PathBuf::from("/Volumes");
+    if volumes.is_dir() {
+      roots.push(volumes);
+    }
     if let Ok(current_dir) = env::current_dir() {
         roots.push(current_dir);
     }
