@@ -1,6 +1,6 @@
 # VibeTerm 2
 
-`vibeterm@0.2.0` is a desktop-first terminal workspace built with Tauri, React, and xterm.js.
+`@swarmclawai/vibeterm@0.2.0` is a desktop-first terminal workspace built with Tauri, React, and xterm.js.
 
 It supports:
 
@@ -14,7 +14,7 @@ It supports:
 ## Install
 
 ```bash
-npm install -g vibeterm
+npm install -g @swarmclawai/vibeterm
 ```
 
 ## Start

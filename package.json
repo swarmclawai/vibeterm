@@ -1,10 +1,36 @@
 {
-  "name": "vibeterm",
+  "name": "@swarmclawai/vibeterm",
   "version": "0.2.0",
   "type": "module",
+  "description": "Desktop-first terminal workspace with Tauri, launcher-aware sessions, and a companion browser.",
+  "homepage": "https://github.com/swarmclawai/vibeterm#readme",
+  "bugs": {
+    "url": "https://github.com/swarmclawai/vibeterm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swarmclawai/vibeterm.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
   "bin": {
     "vibeterm": "./bin/vibeterm.mjs"
   },
+  "files": [
+    "bin",
+    "public",
+    "scripts",
+    "src",
+    "src-tauri",
+    "index.html",
+    "tsconfig.json",
+    "tsconfig.node.json",
+    "vite.config.ts"
+  ],
   "scripts": {
     "start": "node scripts/run-mode.mjs",
     "desktop": "node scripts/run-mode.mjs desktop",
