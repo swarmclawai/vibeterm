@@ -1,6 +1,6 @@
 {
   "name": "@swarmclawai/vibeterm",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "Desktop-first terminal workspace with Tauri and launcher-aware sessions.",
   "homepage": "https://github.com/swarmclawai/vibeterm#readme",

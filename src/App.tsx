@@ -3,7 +3,7 @@ import { AppSplash } from "./components/AppSplash";
 import { TopBar } from "./components/TopBar";
 import { StatusBar } from "./components/StatusBar";
 import { WorkspaceShell } from "./components/WorkspaceShell";
-import { killSession } from "./lib/tauri";
+import { getTerminalRuntime, killSession } from "./lib/tauri";
 import { changeGridWithWarning, confirmPendingGridChange, cancelPendingGridChange } from "./lib/grid";
 import { getThemeGlow } from "./lib/themes";
 import { useStore } from "./store";
@@ -59,6 +59,7 @@ export default function App() {
   const [booting, setBooting] = useState(true);
   const theme = useStore((s) => s.themePreview ?? s.theme);
   const settings = useStore((s) => s.settings);
+  const isRemoteRuntime = getTerminalRuntime() === "remote";
   const removeSession = useStore((s) => s.removeSession);
   const panes = useStore((s) => s.panes);
   const focusedPane = useStore((s) => s.focusedPane);
@@ -223,8 +224,24 @@ export default function App() {
     root.style.setProperty("--vt-gap", `${settings.gap}px`);
   }, [theme, settings]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isRemoteRuntime) {
+      root.dataset.vtRuntime = "remote";
+      return () => {
+        delete root.dataset.vtRuntime;
+      };
+    }
+
+    delete root.dataset.vtRuntime;
+    return undefined;
+  }, [isRemoteRuntime]);
+
   return (
-    <div className="relative flex h-screen min-h-0 flex-col overflow-hidden">
+    <div
+      className="relative flex h-screen min-h-0 flex-col overflow-hidden"
+      style={isRemoteRuntime ? { height: "100dvh", minHeight: "100dvh", maxHeight: "100dvh" } : undefined}
+    >
       <AppSplash visible={booting} />
       <TopBar />
       <div className="flex flex-1 min-h-0 min-w-0 p-2">

@@ -14,6 +14,14 @@ body,
     "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
 }
 
+html[data-vt-runtime="remote"],
+html[data-vt-runtime="remote"] body,
+html[data-vt-runtime="remote"] #root {
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
 button:not(:disabled),
 select:not(:disabled),
 summary,
@@ -96,6 +104,7 @@ select:disabled {
   background: var(--vt-separator, #21262d);
   transition: background 0.15s;
 }
+
 [data-panel-resize-handle-id]:hover,
 [data-panel-resize-handle-id][data-resize-handle-active] {
   background: var(--vt-separator-active, #388bfd);

@@ -141,7 +141,7 @@ export function TerminalPane({ sessionId, paneIndex }: TerminalPaneProps) {
 
   return (
     <div
-      className={`flex flex-col h-full w-full select-none ${isFocused && glowEnabled ? "pane-glow" : ""}`}
+      className={`flex h-full w-full min-h-0 min-w-0 flex-col select-none ${isFocused && glowEnabled ? "pane-glow" : ""}`}
       style={{
         ...glowStyle,
         opacity: isBeingDragged ? 0.5 : 1,
